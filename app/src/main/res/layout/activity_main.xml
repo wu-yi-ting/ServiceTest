@@ -8,21 +8,6 @@
     android:gravity="center"
     tools:context="com.app.bella.servicetest.MainActivity">
 
-    <Button
-        android:id="@+id/btnStart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="開始Service "
-        tools:layout_editor_absoluteX="130dp"
-        tools:layout_editor_absoluteY="84dp" />
-
-    <Button
-        android:id="@+id/btnStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="停止Service"
-        tools:layout_editor_absoluteX="130dp"
-        tools:layout_editor_absoluteY="160dp" />
 
     <Button
         android:id="@+id/btnCon"

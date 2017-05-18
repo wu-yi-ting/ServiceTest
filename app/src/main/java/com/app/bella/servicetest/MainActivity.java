@@ -16,66 +16,32 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "ooo_MainActivity";
 
     private Button mBtnStart, mBtnStop, mBtnBind, mBtnUnBind, mBtnCall;
+    private Intent it;
+    private int mData = 0;
 
-    private MyService mMyService = null;
-
-    private ServiceConnection mServConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mMyService = ((MyService.LocalBinder) service).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            getLocalClassName();//getClassName
-        }
-    };
+    private MyService.LocalBinder mMyService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBtnStart = (Button) findViewById(R.id.btnStart);
-        mBtnStop = (Button) findViewById(R.id.btnStop);
         mBtnBind = (Button) findViewById(R.id.btnCon);
         mBtnUnBind = (Button) findViewById(R.id.btnUnbind);
         mBtnCall = (Button) findViewById(R.id.btnCall);
-
-        Log.v(TAG,"MainActivity thread id is  " + Thread.currentThread().getId());
+        it = new Intent(MainActivity.this, MyService.class);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mBtnStart.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mMyService = null;
-                Intent it = new Intent(MainActivity.this, MyService.class);
-                startService(it);  //start service
-                Log.v(TAG, "mBtnStart");
-            }
-        });
-
-        mBtnStop.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.v(TAG, "mBtnStop");
-                mMyService = null;
-                Intent it = new Intent(MainActivity.this, MyService.class);
-                stopService(it);
-
-            }
-        });
 
         mBtnBind.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.v(TAG, "mBtnBind");
                 mMyService = null;
-                Intent it = new Intent(MainActivity.this, MyService.class);
                 bindService(it, mServConn, BIND_AUTO_CREATE);
             }
         });
@@ -85,25 +51,43 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.v(TAG, "mBtnUnBind");
                 mMyService = null;
-                Intent it = new Intent(MainActivity.this, MyService.class);
                 unbindService(mServConn);
+                mData=0;
             }
         });
 
         mBtnCall.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Log.v(TAG, "mBtnCall");
-                mMyService = null;
-                Intent it = new Intent(MainActivity.this, MyService.class);
                 if (mMyService != null) {
-                    mMyService.myMethod();
+                    mMyService.addNumber(mData);
+                    mData++;
                 }
             }
         });
-
-
     }
+
+    private ServiceConnection mServConn = new ServiceConnection() {
+        @Override //當與service的連接建立後被調用
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e(TAG, "on Service connected");
+            mMyService = (MyService.LocalBinder) service;
+            mMyService.registerCallback(mCamServiceCallback);
+        }
+
+        @Override //當與service的連接意外斷開時被調用
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e(TAG, "on Service Disconnected");
+            mMyService = null;
+        }
+    };
+
+    private CameraServiceCallback mCamServiceCallback=new CameraServiceCallback() {
+        @Override
+        public void onGetNumber(int data) {
+            Log.v(TAG, "mCameraServiceCallback.onCameraCallback = " + data); //可獲得service 更新完的資訊
+        }
+    };
 }
 
